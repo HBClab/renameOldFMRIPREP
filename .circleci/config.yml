@@ -8,11 +8,11 @@ jobs: # A basic unit of work in a run
     steps:
       - checkout
       - run:
-        name: Install requirements
-        command: |
-          pip install pytest==4.5.*
-          pip install -r requirements.txt
+          name: Install requirements
+          command: |
+            pip install pytest==4.5.*
+            pip install -r requirements.txt
       - run:
-        name: Test command
-        command: |
-          pytest -vv
+          name: Test rename_old_fmriprep
+          command: |
+            pytest -vv
