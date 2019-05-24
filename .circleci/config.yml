@@ -15,4 +15,4 @@ jobs: # A basic unit of work in a run
       - run:
           name: Test rename_old_fmriprep
           command: |
-            pytest -vv
+            python -m pytest -vv
