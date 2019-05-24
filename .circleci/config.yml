@@ -1,0 +1,18 @@
+version: 2 # use CircleCI 2.0
+jobs: # A basic unit of work in a run
+  build: # runs not using Workflows must have a `build` job as entry point 
+    docker: # run the steps with Docker
+      # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
+      - image: circleci/python:3.6.4
+    working_directory: /tmp/src/rename_fmriprep
+    steps:
+      - checkout
+      - run:
+        name: Install requirements
+        command: |
+          pip install pytest==4.5.*
+          pip install -r requirements.txt
+      - run:
+        name: Test command
+        command: |
+          pytest -vv
