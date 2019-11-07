@@ -1,1 +1,2 @@
-pybids==0.8.*
+pybids~=0.9.4
+requests
