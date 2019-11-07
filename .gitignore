@@ -75,3 +75,6 @@ local_settings.py
 
 # Text Editors
 .vscode
+
+# test cache
+cache.txt
