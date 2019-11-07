@@ -8,9 +8,11 @@ import json
 import os
 import re
 from shutil import copyfile
+import tempfile
 
 from bids.layout.writing import build_path
-
+import numpy as np
+import nibabel as nb
 
 # templates for matching the old fmriprep files
 BIDS_NAME = (
@@ -53,7 +55,7 @@ PATH_PATTERN = (
     '.{ext}')
 
 
-def rename_fmriprep_files(fmriprep_dir, renamed_dir, dset_desc):
+def rename_fmriprep_files(fmriprep_dir, renamed_dir, dset_desc, gen_ref=False):
     # copy the dataset_description file over first
     os.makedirs(renamed_dir, exist_ok=True)
     copyfile(dset_desc, os.path.join(renamed_dir, os.path.basename(dset_desc)))
@@ -118,6 +120,20 @@ def rename_fmriprep_files(fmriprep_dir, renamed_dir, dset_desc):
                 os.makedirs(new_root, exist_ok=True)
                 copyfile(old_path, new_path)
 
+                if file_dict['suffix'] == 'bold' and gen_ref:
+                    ref_nii = nb.load(new_path)
+                    # take the median of the first 10 volumes
+                    median_image_data = np.median(
+                        ref_nii.dataobj[:, :, :, :10], axis=3)
+                    # do not need description
+                    del file_dict['desc']
+                    file_dict['suffix'] = "boldref"
+                    boldref_file = build_path(file_dict, PATH_PATTERN)
+                    boldref_path = os.path.join(new_root, boldref_file)
+                    nb.Nifti1Image(median_image_data, ref_nii.affine,
+                                   ref_nii.header).to_filename(boldref_path)
+                    rename_files[boldref_path] = boldref_path
+
     # write out log for how files were renamed
     data_transfer_log = os.path.join(renamed_dir, "logs", "data_transfer.json")
     os.makedirs(os.path.dirname(data_transfer_log), exist_ok=True)
@@ -143,11 +159,13 @@ def main():
                                action='store', required=True,
                                help='the required dataset description file to be placed '
                                'at the root folder of fmriprep')
+    parser.add_argument('--gen-ref', action='store_true', default=False,
+                        help='generate a reference bold image (necessary for xcpengine)')
 
     opts = parser.parse_args()
 
     # rename the files
-    rename_fmriprep_files(opts.fmriprep_dir, opts.renamed_dir, opts.dset_desc)
+    rename_fmriprep_files(opts.fmriprep_dir, opts.renamed_dir, opts.dset_desc, opts.gen_ref)
 
 
 if __name__ == '__main__':
