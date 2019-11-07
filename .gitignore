@@ -78,3 +78,4 @@ local_settings.py
 
 # test cache
 cache.txt
+sub-01_ses-post_task-flanker_bold_space-MNI152NLin2009cAsym_variant-smoothAROMAnonaggr_preproc.nii.gz
